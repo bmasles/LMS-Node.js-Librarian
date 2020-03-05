@@ -5,7 +5,16 @@ let bookService = {
         return mongoose.model('Book').find().exec();
     },
     readById: function(id) {
-        return mongoose.model('Book').findById({ _id: id}).exec();
+        try {
+            return mongoose.model('Book').findById({ _id: id }).exec();
+        } catch (error) {
+            if (error.name == 'ValidationError' || error.name == 'CastError') {
+                throw error;
+            }
+            else {
+                throw { name: 'ServerError'};
+            }
+        }
     }
 }
 

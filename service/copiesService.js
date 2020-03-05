@@ -7,7 +7,16 @@ let copiesService = {
         return mongoose.model('Copy').find().exec();
     },
     readById: function (id) {
-        return mongoose.model('Copy').findById({ _id: id }).exec();
+        try {
+            return mongoose.model('Copy').findById({ _id: id }).exec();
+        } catch (error) {
+            if (error.name == 'ValidationError' || error.name == 'CastError') {
+                throw error;
+            }
+            else {
+                throw { name: 'ServerError'};
+            }
+        }
     },
     create: async function (copy) {
         try {
@@ -17,8 +26,13 @@ let copiesService = {
         } catch (error) {
             await transaction.rollback().catch(console.error);
             transaction.clean();
+            if (error.error.name == 'ValidationError' || error.name == 'CastError') {
+                throw error;
+            }
+            else {
+                throw { name: 'ServerError'};
+            }
         }
-        // return mongoose.model('Copy').create(copy).exec();
     },
     delete: async function (id) {
         try {
@@ -27,6 +41,12 @@ let copiesService = {
         } catch (error) {
             await transaction.rollback().catch(console.error);
             transaction.clean();
+            if (error.name == 'ValidationError' || error.name == 'CastError' || error.error.message == 'Entity not found') {
+                throw error;
+            }
+            else {
+                throw { name: 'ServerError'};
+            }
         }
     },
     update: async function (id, newCopy) {
@@ -36,6 +56,12 @@ let copiesService = {
         } catch (error) {
             await transaction.rollback().catch(console.error);
             transaction.clean();
+            if (error.name == 'ValidationError' || error.name == 'CastError') {
+                throw error;
+            }
+            else {
+                throw { name: 'ServerError'};
+            }
         }
     }
 }
