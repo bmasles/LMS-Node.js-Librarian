@@ -4,11 +4,11 @@ const transaction = new Transaction();
 
 let librarybranchesService = {
     read: function () {
-        return mongoose.model('LibraryBranch').find().exec();
+        return mongoose.model('LibraryBranch').find().populate('copies').exec();
     },
     readById: function (id) {
         try {
-            return mongoose.model('LibraryBranch').findById({ _id: id }).exec();
+            return mongoose.model('LibraryBranch').findById({ _id: id }).populate('copies').exec();
         } catch (error) {
             if (error.name == 'ValidationError' || error.name == 'CastError') {
                 throw error;

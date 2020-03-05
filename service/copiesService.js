@@ -4,11 +4,11 @@ const transaction = new Transaction();
 
 let copiesService = {
     read: function () {
-        return mongoose.model('Copy').find().exec();
+        return mongoose.model('Copy').find().populate('book').populate('libraryBranch').exec();
     },
     readById: function (id) {
         try {
-            return mongoose.model('Copy').findById({ _id: id }).exec();
+            return mongoose.model('Copy').findById({ _id: id }).populate('book').populate('libraryBranch').exec();
         } catch (error) {
             if (error.name == 'ValidationError' || error.name == 'CastError') {
                 throw error;
