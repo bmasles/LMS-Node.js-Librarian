@@ -14,7 +14,7 @@ let librarybranchesService = {
                 throw error;
             }
             else {
-                throw { name: 'ServerError'};
+                throw { name: 'ServerError' };
             }
         }
     },
@@ -30,7 +30,7 @@ let librarybranchesService = {
                 throw error;
             }
             else {
-                throw { name: 'ServerError'};
+                throw { name: 'ServerError' };
             }
         }
     },
@@ -46,7 +46,7 @@ let librarybranchesService = {
             }
             else {
                 console.log(error.error.message);
-                throw { name: 'ServerError'};
+                throw { name: 'ServerError' };
             }
         }
     },
@@ -61,7 +61,7 @@ let librarybranchesService = {
                 throw error;
             }
             else {
-                throw { name: 'ServerError'};
+                throw { name: 'ServerError' };
             }
         }
     }

@@ -1,5 +1,6 @@
 let mongoose = require('mongoose');
 const Transaction = require("mongoose-transactions");
+let libraryBranchService = require('./libraryBranchService');
 const transaction = new Transaction();
 
 let copiesService = {
@@ -21,6 +22,9 @@ let copiesService = {
     create: async function (copy) {
         try {
             const copyId = transaction.insert(mongoose.model('Copy').modelName, copy);
+            let libraryBranch = await libraryBranchService.readById(copy.libraryBranch);
+            libraryBranch.copies.push(copyId);
+            libraryBranchService.update(libraryBranch.id, libraryBranch);
             await transaction.run();
             return copyId;
         } catch (error) {
@@ -36,6 +40,10 @@ let copiesService = {
     },
     delete: async function (id) {
         try {
+            let copy = await this.readById(id);
+            let libraryBranch = await libraryBranchService.readById(copy.libraryBranch.id);
+            libraryBranch.copies.splice(libraryBranch.copies.indexOf(id), 1);
+            libraryBranchService.update(libraryBranch.id, libraryBranch);
             transaction.remove(mongoose.model('Copy').modelName, id);
             await transaction.run();
         } catch (error) {

@@ -127,7 +127,7 @@ router.get('/librarian/copies/:id', function (req, res) {
 });
 
 router.post('/librarian/copies', function (req, res) {
-    copiesService.create(req.body).then(function (id) {
+    copyService.create(req.body).then(function (id) {
         res.append('Location', 'localhost:3000/librarian/copies/' + id);
         res.status(201);
         res.send();
@@ -144,7 +144,7 @@ router.post('/librarian/copies', function (req, res) {
 });
 
 router.put('/librarian/copies/:id', function (req, res) {
-    copiesService.update(req.params.id, req.body).then(function () {
+    copyService.update(req.params.id, req.body).then(function () {
         res.status(204);
         res.send();
     }).catch( function (err) {
@@ -160,7 +160,7 @@ router.put('/librarian/copies/:id', function (req, res) {
 });
 
 router.delete('/librarian/copies/:id', function (req, res) {
-    copiesService.delete(req.params.id).then(function () {
+    copyService.delete(req.params.id).then(function () {
         res.status(204);
         res.send();
     }).catch( function (err) {
