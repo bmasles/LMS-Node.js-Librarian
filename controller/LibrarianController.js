@@ -1,20 +1,24 @@
 let expressRouter = require('express').Router;
 let router = expressRouter();
-let mongoose = require('mongoose');
-require('../model/Book');
-require('../model/Author');
-require('../model/Copy');
-require('../model/Genre');
-require('../model/LibraryBranch');
-require('../model/Publisher');
+let convert = require('xml-js');
 let bookService = require('../service/bookService');
 let copyService = require('../service/copiesService');
 let libraryBranchService = require('../service/libraryBranchService');
 
 router.get('/librarian/books', function (req, res) {
     bookService.read().then(function (books) {
-        res.send(books);
+        let result = '';
+        res.format({
+            json: function() {res.send(books);},
+            xml: function() {
+                books.forEach(book => {
+                    result += convert.js2xml(book.toObject(), {compact: true, ignoreComment: true, spaces: 4});
+                });
+                res.send(result);
+            }
+        })
     }).catch( function (err) {
+        console.log(err);
         res.status(500);
         res.send();
     });
@@ -22,7 +26,11 @@ router.get('/librarian/books', function (req, res) {
 
 router.get('/librarian/books/:id', function (req, res) {
     bookService.readById(req.params.id).then(function (book) {
-        res.send(book);
+        if (!book) {
+            res.status(404);
+            res.send('Could not find book by that id');
+        }
+        else res.send(book);
     }).catch( function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
@@ -43,7 +51,11 @@ router.get('/librarian/libraryBranches', function (req, res) {
 
 router.get('/librarian/libraryBranches/:id', function (req, res) {
     libraryBranchService.readById(req.params.id).then(function (libraryBranch) {
-        res.send(libraryBranch);
+        if (!libraryBranch) {
+            res.status(404);
+            res.send('Could not find libraryBranch by that id');
+        }
+        else res.send(libraryBranch);
     }).catch( function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
@@ -113,11 +125,19 @@ router.get('/librarian/copies', function (req, res) {
 
 router.get('/librarian/copies/:id', function (req, res) {
     copyService.readById(req.params.id).then(function (copy) {
-        res.send(copy);
+        if (!copy) {
+            res.status(404);
+            res.send('Could not find copy by that id');
+        }
+        else res.send(copy);
     }).catch( function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
+        }
+        if (err.name == 'Not Found') {
+            res.status(404);
+            res.send(err.message);
         }
         else {
             res.status(400);
@@ -167,6 +187,10 @@ router.delete('/librarian/copies/:id', function (req, res) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
+        }
+        if (err.name == 'Not Found') {
+            res.status(404);
+            res.send(err.message);
         }
         else {
             res.status(400);

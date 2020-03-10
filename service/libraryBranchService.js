@@ -1,14 +1,14 @@
-let mongoose = require('mongoose');
+let libraryBranchDao = require('../dao/libraryBranchDao');
 const Transaction = require("mongoose-transactions");
 const transaction = new Transaction();
 
 let librarybranchesService = {
     read: function () {
-        return mongoose.model('LibraryBranch').find().populate('copies').exec();
+        return libraryBranchDao.read();
     },
     readById: function (id) {
         try {
-            return mongoose.model('LibraryBranch').findById({ _id: id }).populate('copies').exec();
+            return libraryBranchDao.readById(id);
         } catch (error) {
             if (error.name == 'ValidationError' || error.name == 'CastError') {
                 throw error;
@@ -20,7 +20,7 @@ let librarybranchesService = {
     },
     create: async function (libraryBranch) {
         try {
-            const libraryBranchId = transaction.insert(mongoose.model('LibraryBranch').modelName, libraryBranch);
+            const libraryBranchId = libraryBranchDao.create(libraryBranch, transaction);
             await transaction.run();
             return libraryBranchId;
         } catch (error) {
@@ -36,7 +36,7 @@ let librarybranchesService = {
     },
     delete: async function (id) {
         try {
-            transaction.remove(mongoose.model('LibraryBranch').modelName, id);
+            libraryBranchDao.delete(id, transaction);
             await transaction.run();
         } catch (error) {
             await transaction.rollback().catch(console.error);
@@ -52,7 +52,7 @@ let librarybranchesService = {
     },
     update: async function (id, newLibraryBranch) {
         try {
-            transaction.update(mongoose.model('LibraryBranch').modelName, id, newLibraryBranch);
+            libraryBranchDao.update(id, newLibraryBranch, transaction);
             await transaction.run();
         } catch (error) {
             await transaction.rollback().catch(console.error);

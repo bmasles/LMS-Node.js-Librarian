@@ -1,14 +1,14 @@
-let mongoose = require('mongoose');
+let bookDao = require('../dao/bookDao');
 
 let bookService = {
     read: function() {
-        return mongoose.model('Book').find().exec();
+        return bookDao.read();
     },
     readById: function(id) {
         try {
-            return mongoose.model('Book').findById({ _id: id }).exec();
+            return bookDao.readById(id);
         } catch (error) {
-            if (error.name == 'ValidationError' || error.name == 'CastError') {
+            if (error.name == 'ValidationError' || error.name == 'CastError' ) {
                 throw error;
             }
             else {

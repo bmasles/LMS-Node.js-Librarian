@@ -1,15 +1,15 @@
-let mongoose = require('mongoose');
+let copiesDao = require('../dao/copiesDao');
+let libraryBranchDao = require('../dao/libraryBranchDao');
 const Transaction = require("mongoose-transactions");
-let libraryBranchService = require('./libraryBranchService');
 const transaction = new Transaction();
 
 let copiesService = {
     read: function () {
-        return mongoose.model('Copy').find().populate('book').populate('libraryBranch').exec();
+        return copiesDao.read();
     },
     readById: function (id) {
         try {
-            return mongoose.model('Copy').findById({ _id: id }).populate('book').populate('libraryBranch').exec();
+            return copiesDao.readById(id);
         } catch (error) {
             if (error.name == 'ValidationError' || error.name == 'CastError') {
                 throw error;
@@ -21,10 +21,11 @@ let copiesService = {
     },
     create: async function (copy) {
         try {
-            const copyId = transaction.insert(mongoose.model('Copy').modelName, copy);
-            let libraryBranch = await libraryBranchService.readById(copy.libraryBranch);
+            const copyId = copiesDao.create(copy, transaction);
+            let libraryBranch = await libraryBranchDao.readById(copy.libraryBranch);
+            if (!libraryBranch) throw { name: "Not Found", message: "Could not find libararyBranch by that id"};
             libraryBranch.copies.push(copyId);
-            libraryBranchService.update(libraryBranch.id, libraryBranch);
+            libraryBranchDao.update(libraryBranch.id, libraryBranch, transaction);
             await transaction.run();
             return copyId;
         } catch (error) {
@@ -40,11 +41,13 @@ let copiesService = {
     },
     delete: async function (id) {
         try {
-            let copy = await this.readById(id);
-            let libraryBranch = await libraryBranchService.readById(copy.libraryBranch.id);
+            let copy = await copiesDao.readById(id);
+            if (!copy) throw { name: "Not Found", message: "Could not find Copy by that id"};
+            let libraryBranch = await libraryBranchDao.readById(copy.libraryBranch.id);
+            if (!libraryBranch) throw { name: "Not Found", message: "Could not find libararyBranch by that id"};
             libraryBranch.copies.splice(libraryBranch.copies.indexOf(id), 1);
-            libraryBranchService.update(libraryBranch.id, libraryBranch);
-            transaction.remove(mongoose.model('Copy').modelName, id);
+            libraryBranchDao.update(libraryBranch.id, libraryBranch, transaction);
+            copiesDao.delete(id, transaction);
             await transaction.run();
         } catch (error) {
             await transaction.rollback().catch(console.error);
@@ -59,7 +62,7 @@ let copiesService = {
     },
     update: async function (id, newCopy) {
         try {
-            transaction.update(mongoose.model('Copy').modelName, id, newCopy);
+            copiesDao.update(id, newCopy, transaction);
             await transaction.run();
         } catch (error) {
             await transaction.rollback().catch(console.error);
