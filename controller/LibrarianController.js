@@ -9,16 +9,15 @@ router.get('/librarian/books', function (req, res) {
     bookService.read().then(function (books) {
         let result = '';
         res.format({
-            json: function() {res.send(books);},
-            xml: function() {
+            json: function () { res.send(books); },
+            xml: function () {
                 books.forEach(book => {
-                    result += convert.js2xml(book.toObject(), {compact: true, ignoreComment: true, spaces: 4});
+                    result += convert.js2xml(book.toObject(), { compact: true, ignoreComment: true, spaces: 4 });
                 });
                 res.send(result);
             }
-        })
-    }).catch( function (err) {
-        console.log(err);
+        });
+    }).catch(function (err) {
         res.status(500);
         res.send();
     });
@@ -30,8 +29,15 @@ router.get('/librarian/books/:id', function (req, res) {
             res.status(404);
             res.send('Could not find book by that id');
         }
-        else res.send(book);
-    }).catch( function (err) {
+        else {
+            res.format({
+                json: function () { res.send(book); },
+                xml: function () {
+                    res.send(convert.js2xml(book.toObject(), { compact: true, ignoreComment: true, spaces: 4 }))
+                }
+            });
+        }
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -45,7 +51,16 @@ router.get('/librarian/books/:id', function (req, res) {
 
 router.get('/librarian/libraryBranches', function (req, res) {
     libraryBranchService.read().then(function (libraryBranches) {
-        res.send(libraryBranches);
+        let result = '';
+        res.format({
+            json: function () { res.send(libraryBranches); },
+            xml: function () {
+                libraryBranches.forEach(branch => {
+                    result += convert.js2xml(branch.toObject(), { compact: true, ignoreComment: true, spaces: 4 });
+                });
+                res.send(result);
+            }
+        });
     });
 });
 
@@ -55,8 +70,15 @@ router.get('/librarian/libraryBranches/:id', function (req, res) {
             res.status(404);
             res.send('Could not find libraryBranch by that id');
         }
-        else res.send(libraryBranch);
-    }).catch( function (err) {
+        else {
+            res.format({
+                json: function () { res.send(libraryBranch); },
+                xml: function () {
+                    res.send(convert.js2xml(libraryBranch.toObject(), { compact: true, ignoreComment: true, spaces: 4 }))
+                }
+            });
+        }
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -73,7 +95,7 @@ router.post('/librarian/libraryBranches', function (req, res) {
         res.append('Location', 'localhost:3000/librarian/libraryBranches/' + id);
         res.status(201);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -89,7 +111,7 @@ router.put('/librarian/libraryBranches/:id', function (req, res) {
     libraryBranchService.update(req.params.id, req.body).then(function () {
         res.status(204);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -105,7 +127,7 @@ router.delete('/librarian/libraryBranches/:id', function (req, res) {
     libraryBranchService.delete(req.params.id).then(function () {
         res.status(204);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -119,7 +141,16 @@ router.delete('/librarian/libraryBranches/:id', function (req, res) {
 
 router.get('/librarian/copies', function (req, res) {
     copyService.read().then(function (copies) {
-        res.send(copies);
+        let result = '';
+        res.format({
+            json: function () { res.send(copies); },
+            xml: function () {
+                copies.forEach(copy => {
+                    result += convert.js2xml(copy.toObject(), { compact: true, ignoreComment: true, spaces: 4 });
+                });
+                res.send(result);
+            }
+        });
     });
 });
 
@@ -129,8 +160,15 @@ router.get('/librarian/copies/:id', function (req, res) {
             res.status(404);
             res.send('Could not find copy by that id');
         }
-        else res.send(copy);
-    }).catch( function (err) {
+        else {
+            res.format({
+                json: function () { res.send(copy); },
+                xml: function () {
+                    res.send(convert.js2xml(copy.toObject(), { compact: true, ignoreComment: true, spaces: 4 }))
+                }
+            });
+        }
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -151,7 +189,7 @@ router.post('/librarian/copies', function (req, res) {
         res.append('Location', 'localhost:3000/librarian/copies/' + id);
         res.status(201);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -167,7 +205,7 @@ router.put('/librarian/copies/:id', function (req, res) {
     copyService.update(req.params.id, req.body).then(function () {
         res.status(204);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
@@ -183,7 +221,7 @@ router.delete('/librarian/copies/:id', function (req, res) {
     copyService.delete(req.params.id).then(function () {
         res.status(204);
         res.send();
-    }).catch( function (err) {
+    }).catch(function (err) {
         if (err.name == 'ServerError') {
             res.status(500);
             res.send();
