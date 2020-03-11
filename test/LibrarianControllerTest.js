@@ -12,8 +12,6 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Books', function () {
-    //Book.collection.drop();
-
     this.beforeEach(function (done) {
         let newBook = new Book({
             title: "Test Book",
@@ -114,7 +112,6 @@ describe('LibraryBranch', function () {
         chai.request(app)
         .get('/librarian/libraryBranches')
         .end(function (err, res) {
-            // console.log(res.body);
             chai.request(app)
             .put('/librarian/libraryBranches/' + res.body[0]._id)
             .send({
