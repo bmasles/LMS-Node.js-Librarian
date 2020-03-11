@@ -91,4 +91,53 @@ describe('Books', function () {
                 });
         });
     });
-})
+});
+
+describe('LibraryBranch', function () {
+    this.beforeEach(function (done) {
+        let newLibraryBranch = new LibraryBranch({
+            name: "Test LibraryBranch",
+            address: "123 st.",
+            copies: []
+        });
+        newLibraryBranch.save(function (err) {
+            done();
+        });
+    });
+
+    this.afterEach(function (done) {
+        LibraryBranch.collection.drop();
+        done();
+    });
+
+    it('should update a single LibraryBranch from /libraryBranch', function (done) {
+        chai.request(app)
+        .get('/librarian/libraryBranches')
+        .end(function (err, res) {
+            // console.log(res.body);
+            chai.request(app)
+            .put('/librarian/libraryBranches/' + res.body[0]._id)
+            .send({
+                name: "Test LibraryBranch2",
+                address: "456 st.",
+                copies: []
+            })
+            .end(function (error, resolution) {
+                res.should.have.status(200);
+                chai.request(app)
+                .get('/librarian/libraryBranches/')
+                .end(function (e, r) {
+                    r.should.have.status(200);
+                    r.should.be.json;
+                    r.body[0].should.have.property('name');
+                    r.body[0].should.have.property('address');
+                    r.body[0].should.have.property('copies');
+                    r.body[0].name.should.equal('Test LibraryBranch2');
+                    r.body[0].address.should.equal('456 st.');
+                    r.body[0].copies.should.deep.equal([]);
+                    done();
+                })
+            })
+        })
+    });
+});
